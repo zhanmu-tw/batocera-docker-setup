@@ -328,3 +328,24 @@ This setup uses `--privileged` for containers. This is acceptable because:
 - This is a single-user system
 - The entire system is in a VM with hardware passthrough
 - Not hosting internet-facing services
+
+## Bonus
+
+Run portainer
+
+```bash
+# Create directory for Portainer Agent data (if needed)
+mkdir -p /userdata/containers/portainer-agent
+
+# Run Portainer Agent
+docker run -d \
+  --name portainer-agent \
+  --privileged \
+  --restart always \
+  -e PATH=/usr/local/nvidia:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v /var/lib/docker/volumes:/var/lib/docker/volumes \
+  -v /:/host \
+  -p 9001:9001 \
+  portainer/agent:latest
+```
