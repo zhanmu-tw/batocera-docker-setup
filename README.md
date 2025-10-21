@@ -125,7 +125,9 @@ Found in this repo called docker and save it to /userdata/system/services/docker
 
 ### Make executable
 
+```bash
 chmod +x /userdata/system/services/docker
+``` 
 
 ## 4. System PATH Configuration
 
