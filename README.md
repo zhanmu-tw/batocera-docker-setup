@@ -117,11 +117,11 @@ ls -la
 
 ## 3. Batocera Service Creation
 
-This is the **critical** part - the service must properly mount cgroup v1.
+In troubleshooting this, I found that the service needed to mount cgroup v1, and that cgroup2 was mounted. As such the service script will ensure this is set during the service startup
 
-### Create Docker Service
+### Download the script 
 
-Download the script in this repo called docker and put it in /userdata/system/services/docker
+Found in this repo called docker and save it to /userdata/system/services/docker
 
 ### Make executable
 
@@ -129,7 +129,9 @@ chmod +x /userdata/system/services/docker
 
 ## 4. System PATH Configuration
 
-Add Docker and NVIDIA utilities to your system PATH:
+This involves editing a file in profile.d which is not saved across reboot, however batocera provides a command called batocera-save-overlay to persist changes
+
+Add Docker to your system PATH:
 
 ```bash
 # Create profile script
