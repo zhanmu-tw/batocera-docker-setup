@@ -2,6 +2,8 @@
 
 Complete guide for installing Docker with GPU support on Batocera Linux.
 
+If you are not interested in installing GPU support, ignore any instructions marked *[GPU]
+
 ## Overview
 
 This guide enables Docker containers with NVIDIA GPU access on Batocera, allowing you to run AI workloads, monitoring tools, and GPU-accelerated applications alongside your gaming setup.
@@ -17,9 +19,8 @@ This guide enables Docker containers with NVIDIA GPU access on Batocera, allowin
 ## Prerequisites
 
 - Batocera installed and running
-- NVIDIA GPU passed through to Batocera VM (if running in VM)
+- NVIDIA GPU passed through to Batocera VM (if running in VM) *[GPU]
 - SSH access to Batocera
-- At least 500GB free space in `/userdata`
 
 ---
 
@@ -45,14 +46,11 @@ mkdir -p /userdata/docker-data
 /userdata/system/docker/bin/docker --version
 # Should output: Docker version 27.3.1
 
-# Verify runc version (use bundled version - DO NOT downgrade!)
-/userdata/system/docker/bin/runc --version
-# Should output: runc version 1.1.14
 ```
 
 ---
 
-## 2. NVIDIA Utilities Setup
+## 2. NVIDIA Utilities Setup *[GPU]
 
 ### Check Your Driver Version
 
@@ -96,7 +94,7 @@ cd /userdata/system
 rm -rf NVIDIA-Linux-x86_64-560.35.03 NVIDIA-Linux-x86_64-560.35.03.run
 ```
 
-### Create Library Symlinks
+### Create Library Symlinks 
 
 Containers need unversioned library names. Adjust version numbers to match your files:
 
@@ -144,7 +142,9 @@ Add Docker and NVIDIA utilities to your system PATH:
 cat > /etc/profile.d/99-docker.sh << 'EOF'
 # Docker and Nvidia utilities
 export PATH=/userdata/system/nvidia-utils:/userdata/system/docker/bin:$PATH
-export LD_LIBRARY_PATH=/userdata/system/nvidia-utils/lib:$LD_LIBRARY_PATH
+
+# Uncomment to allow running nvidia-smi in the terminal
+# export LD_LIBRARY_PATH=/userdata/system/nvidia-utils/lib:$LD_LIBRARY_PATH
 EOF
 
 chmod +x /etc/profile.d/99-docker.sh
@@ -169,15 +169,15 @@ batocera-services start docker
 # Verify Docker is running
 docker ps
 
-# Verify GPU is accessible on host
-nvidia-smi
+# Verify GPU is accessible on host *[GPU]
+ nvidia-smi
 
 # Verify cgroup v1 is properly mounted
 mount | grep cgroup | grep devices
 # Should show: devices on /sys/fs/cgroup/devices type cgroup
 ```
 
-### Test GPU in Container
+### Test GPU in Container *[GPU]
 
 ```bash
 docker run --rm --privileged \
@@ -219,7 +219,7 @@ batocera-services status docker
 
 ---
 
-## Running GPU Containers
+## Running GPU Containers *[GPU]
 
 ### Standard GPU Container Command
 
@@ -273,7 +273,7 @@ If cgroup v2 is mounted, restart the Docker service:
 batocera-services restart docker
 ```
 
-### nvidia-smi not found in container
+### nvidia-smi not found in container *[GPU]
 
 **Solution:** Check that library symlinks exist:
 
@@ -307,7 +307,7 @@ Cgroup v1 uses a different, older device controller mechanism that works reliabl
 
 - Docker binaries: `/userdata/system/docker/bin/`
 - Docker data: `/userdata/docker-data/`
-- NVIDIA utilities: `/userdata/system/nvidia-utils/`
+- NVIDIA utilities: `/userdata/system/nvidia-utils/` *[GPU]
 - Service script: `/userdata/system/services/docker`
 - PATH configuration: `/etc/profile.d/99-docker.sh`
 - Docker logs: `/userdata/system/docker/docker.log`
@@ -315,7 +315,7 @@ Cgroup v1 uses a different, older device controller mechanism that works reliabl
 ### Software Versions
 
 - **Docker:** 27.3.1 LTS
-- **NVIDIA Driver:** 560.35.03 (match to your system)
+- **NVIDIA Driver:** 560.35.03 (match to your system) *[GPU]
 
 ---
 
