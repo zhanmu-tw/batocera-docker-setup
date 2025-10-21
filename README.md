@@ -2,13 +2,16 @@
 
 Complete guide for installing Docker with GPU support on Batocera Linux.
 
-If you are not interested in installing GPU support, ignore any instructions marked *[GPU]
+If you are not interested in installing GPU support, ignore any instructions marked \*[GPU]
+
+I realized that my batocera VM is sitting there doing nothing for most of the day, but as a dedicated GPU for those rare times I'm allowed free time. I also like to have monitoring on my server for temperatures and usages, so having the dGPU dedicated to a VM limited me. I needed docker.
 
 ## Overview
 
 This guide enables Docker containers with NVIDIA GPU access on Batocera, allowing you to run AI workloads, monitoring tools, and GPU-accelerated applications alongside your gaming setup.
 
 **Tested Configuration:**
+
 - Batocera 41 (Buildroot 2024.05.2)
 - Kernel: 6.11.10
 - NVIDIA GTX 1080 Ti (11GB)
@@ -19,7 +22,7 @@ This guide enables Docker containers with NVIDIA GPU access on Batocera, allowin
 ## Prerequisites
 
 - Batocera installed and running
-- NVIDIA GPU passed through to Batocera VM (if running in VM) *[GPU]
+- NVIDIA GPU passed through to Batocera VM (if running in VM) \*[GPU]
 - SSH access to Batocera
 
 ---
@@ -50,7 +53,7 @@ mkdir -p /userdata/docker-data
 
 ---
 
-## 2. NVIDIA Utilities Setup *[GPU]
+## 2. NVIDIA Utilities Setup \*[GPU]
 
 ### Check Your Driver Version
 
@@ -94,7 +97,7 @@ cd /userdata/system
 rm -rf NVIDIA-Linux-x86_64-560.35.03 NVIDIA-Linux-x86_64-560.35.03.run
 ```
 
-### Create Library Symlinks 
+### Create Library Symlinks
 
 Containers need unversioned library names. Adjust version numbers to match your files:
 
@@ -119,7 +122,7 @@ ls -la
 
 In troubleshooting this, I found that the service needed to mount cgroup v1, and that cgroup2 was mounted. As such the service script will ensure this is set during the service startup
 
-### Download the script 
+### Download the script
 
 Found in this repo called docker and save it to /userdata/system/services/docker
 
@@ -127,7 +130,7 @@ Found in this repo called docker and save it to /userdata/system/services/docker
 
 ```bash
 chmod +x /userdata/system/services/docker
-``` 
+```
 
 ## 4. System PATH Configuration
 
@@ -175,7 +178,7 @@ mount | grep cgroup | grep devices
 # Should show: devices on /sys/fs/cgroup/devices type cgroup
 ```
 
-### Test GPU in Container *[GPU]
+### Test GPU in Container \*[GPU]
 
 ```bash
 docker run --rm --privileged \
@@ -217,7 +220,7 @@ batocera-services status docker
 
 ---
 
-## Running GPU Containers *[GPU]
+## Running GPU Containers \*[GPU]
 
 ### Standard GPU Container Command
 
@@ -271,7 +274,7 @@ If cgroup v2 is mounted, restart the Docker service:
 batocera-services restart docker
 ```
 
-### nvidia-smi not found in container *[GPU]
+### nvidia-smi not found in container \*[GPU]
 
 **Solution:** Check that library symlinks exist:
 
@@ -305,7 +308,7 @@ Cgroup v1 uses a different, older device controller mechanism that works reliabl
 
 - Docker binaries: `/userdata/system/docker/bin/`
 - Docker data: `/userdata/docker-data/`
-- NVIDIA utilities: `/userdata/system/nvidia-utils/` *[GPU]
+- NVIDIA utilities: `/userdata/system/nvidia-utils/` \*[GPU]
 - Service script: `/userdata/system/services/docker`
 - PATH configuration: `/etc/profile.d/99-docker.sh`
 - Docker logs: `/userdata/system/docker/docker.log`
@@ -313,7 +316,7 @@ Cgroup v1 uses a different, older device controller mechanism that works reliabl
 ### Software Versions
 
 - **Docker:** 27.3.1 LTS
-- **NVIDIA Driver:** 560.35.03 (match to your system) *[GPU]
+- **NVIDIA Driver:** 560.35.03 (match to your system) \*[GPU]
 
 ---
 
