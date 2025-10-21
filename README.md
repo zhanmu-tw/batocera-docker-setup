@@ -123,7 +123,8 @@ This is the **critical** part - the service must properly mount cgroup v1.
 
 Download the script in this repo called docker and put it in /userdata/system/services/docker
 
-# Make executable
+### Make executable
+
 chmod +x /userdata/system/services/docker
 
 ## 4. System PATH Configuration
