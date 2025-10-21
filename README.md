@@ -342,7 +342,7 @@ docker run -d \
   --name portainer-agent \
   --privileged \
   --restart always \
-  -e PATH=/usr/local/nvidia:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
+  -e PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v /var/lib/docker/volumes:/var/lib/docker/volumes \
   -v /:/host \
