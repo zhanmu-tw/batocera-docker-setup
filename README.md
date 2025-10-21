@@ -126,13 +126,6 @@ Download the script in this repo called docker and put it in /userdata/system/se
 # Make executable
 chmod +x /userdata/system/services/docker
 
-# Enable service (auto-start on boot)
-mkdir -p /userdata/system/services/enabled
-ln -sf /userdata/system/services/docker /userdata/system/services/enabled/docker
-```
-
----
-
 ## 4. System PATH Configuration
 
 Add Docker and NVIDIA utilities to your system PATH:
