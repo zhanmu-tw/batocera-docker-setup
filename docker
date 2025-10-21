@@ -1,43 +1,63 @@
-cat > /userdata/system/services/docker << 'EOF'
 #!/bin/bash
 
 SERVICE_NAME="Docker"
+LOG_FILE="/userdata/system/docker/service.log"
+
+log() {
+    echo "[$(date)] $1" >> "$LOG_FILE"
+}
 
 case "$1" in
     start)
+        log "Docker service starting..."
+        
+        # Set PATH so dockerd can find containerd and other binaries
+        export PATH="/userdata/system/docker/bin:$PATH"
+        log "PATH set to: $PATH"
+        
         # Unmount cgroup v2 if present
         if mount | grep -q "cgroup2"; then
-            umount /sys/fs/cgroup 2>/dev/null || true
-            umount /sys/fs/cgroup 2>/dev/null || true
+            log "Unmounting cgroup v2..."
+            umount /sys/fs/cgroup 2>&1 | tee -a "$LOG_FILE"
+            umount /sys/fs/cgroup 2>&1 | tee -a "$LOG_FILE"
         fi
         
         # Mount cgroup v1 (REQUIRED for Docker device access)
         if ! mount | grep -q "cgroup_root"; then
-            mount -t tmpfs cgroup_root /sys/fs/cgroup
+            log "Mounting cgroup v1..."
+            mount -t tmpfs cgroup_root /sys/fs/cgroup 2>&1 | tee -a "$LOG_FILE"
             mkdir -p /sys/fs/cgroup/{cpuset,cpu,cpuacct,memory,devices,freezer,blkio,perf_event,pids}
-            mount -t cgroup -o devices devices /sys/fs/cgroup/devices
-            mount -t cgroup -o freezer freezer /sys/fs/cgroup/freezer
-            mount -t cgroup -o perf_event perf_event /sys/fs/cgroup/perf_event
+            mount -t cgroup -o devices devices /sys/fs/cgroup/devices 2>&1 | tee -a "$LOG_FILE"
+            mount -t cgroup -o freezer freezer /sys/fs/cgroup/freezer 2>&1 | tee -a "$LOG_FILE"
+            mount -t cgroup -o perf_event perf_event /sys/fs/cgroup/perf_event 2>&1 | tee -a "$LOG_FILE"
+        else
+            log "Cgroup v1 already mounted"
         fi
         
         # Verify critical cgroup is mounted
         if [ ! -d /sys/fs/cgroup/devices ]; then
-            echo "ERROR: Failed to mount cgroup devices controller"
+            log "ERROR: Failed to mount cgroup devices controller"
             exit 1
         fi
         
-        # Start Docker daemon
+        log "Starting dockerd..."
+        # Start Docker daemon (dockerd needs containerd in PATH)
         /userdata/system/docker/bin/dockerd \
           --data-root /userdata/docker-data \
           --exec-root /var/run/docker \
           --pidfile /var/run/docker.pid \
           --host=unix:///var/run/docker.sock \
-          > /userdata/system/docker/docker.log 2>&1 &
+          --userland-proxy-path=/userdata/system/docker/bin/docker-proxy \
+          >> /userdata/system/docker/docker.log 2>&1 &
         
+        DOCKER_PID=$!
+        log "Docker service started (PID: $DOCKER_PID)"
         echo "$SERVICE_NAME started"
         ;;
     stop)
+        log "Stopping Docker..."
         killall dockerd 2>/dev/null
+        log "Docker stopped"
         echo "$SERVICE_NAME stopped"
         ;;
     restart)
@@ -59,11 +79,3 @@ case "$1" in
 esac
 
 exit 0
-EOF
-
-# Make executable
-chmod +x /userdata/system/services/docker
-
-# Enable service (auto-start on boot)
-mkdir -p /userdata/system/services/enabled
-ln -sf /userdata/system/services/docker /userdata/system/services/enabled/docker
